@@ -6,7 +6,8 @@ from ..lib import utils
 from .. import sanitized_config as c
 from datetime import datetime
 
-random.seed(datetime.now())
+# Use epoch as random seed (timestamp() is Python 3.3+)
+random.seed(int(datetime.now().timestamp()))
 
 WRITE_BUFFER = """
 {struct_name} {variable_name} = {struct_data};
@@ -167,16 +168,18 @@ def main():
         headers_dir = network_path / "c"
         source_paths = ""
 
-        for header_name in headers_dir.iterdir():
+        for header_name in pathlib.Path(headers_dir).rglob("*"):
+            # get the path after "naked_generator/test/c/""
+            name = str(pathlib.PurePath(header_name).relative_to("naked_generator/test/c"))
             if header_name.suffix != ".h":
                 continue
-            include_path = header_name.name.replace(".h", ".c")
+            include_path = name.replace(".h", ".c")
 
             source_paths += include_path + " "
             includes += f"#include \"{include_path}\"\n"
 
         output_dir = naked_generator_output_dir / network_name / "c"
-        output_file_name = "test.c"
+        output_file_name = "can/test.c"
         utils.create_subtree(output_dir)
 
         print(f"====== RUNNING C TESTS FOR {network_name}  ======")

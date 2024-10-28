@@ -24,15 +24,19 @@ def generate(schema, output_path: str, filename: str):
     """
     structs, enums, bitsets = __parse_schema(copy.copy(schema), prefix=filename)
 
-    utils.create_subtree(output_path)
+    # Prefix the output path to not pollute includes
+    prefixed_output_path = f"{output_path}/can/network"
 
-    with open(f"{output_path}/{filename}.h", "w") as f:
+    utils.create_subtree(prefixed_output_path)
+
+    with open(f"{prefixed_output_path}/{filename}.h", "w") as f:
         f.write(__generate_h(structs, enums, bitsets, filename))
 
-    with open(f"{output_path}/{filename}.c", "w") as f:
+    with open(f"{prefixed_output_path}/{filename}.c", "w") as f:
         f.write(__generate_c(structs, enums, bitsets, filename))
 
-    with open(f"{output_path}/test.c", "w") as f:
+    # Don't use prefixed path to avoid conflict with a network called "test"
+    with open(f"{output_path}/can/test.c", "w") as f:
         f.write(__generate_test_c(structs, enums, bitsets, filename))
 
 
