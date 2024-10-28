@@ -174,7 +174,8 @@ def __random_values(struct):
         elif isinstance(field_type, s.Padding):
             values.append("0")
         else:
-            f = 1 / field_type.precision
+            # Use floor division so f is not a float (rounds down to nearest int)
+            f = 1 // field_type.precision
             values.append(str(rd.randrange(
                 field_type.range[0] * f,
                 field_type.range[1] * f,
